@@ -18,6 +18,7 @@ namespace Friendplant {
         public const string Token = "Token";
         public const string Prefix = "*";
         public const ulong AvatcherId = 354297822691983371;
+        public const string Version = "1.0.7";
     }
     class Bot {
         public DiscordClient Client { get; private set; }
@@ -138,9 +139,9 @@ namespace Friendplant {
             // Set Activity
             Client.UpdateStatusAsync(
                 game: new DiscordGame {
-                    Name = "Переделывается..."
+                    Name = "*help"
                 },
-                user_status: UserStatus.DoNotDisturb
+                user_status: UserStatus.Online
                 );
 
             // Do Autosave

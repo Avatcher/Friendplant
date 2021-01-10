@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Bot.cs~RF22d5fa42.TMP" />
+    <None Remove="Commands\CMMoney.cs~RF24936e93.TMP" />
     <None Remove="Data\Base.cs~RF1a072dfc.TMP" />
     <None Remove="Data\BinSer.cs~RF1a238d6a.TMP" />
   </ItemGroup>

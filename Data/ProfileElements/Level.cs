@@ -10,19 +10,20 @@ namespace Friendplant.Data.ProfileElements {
         public int Experience { get; set; }
         public int ExpNeeding { get; set; }
 
-        public bool Radiate { get; set; }
+        public int TotalExperience { get; set; }
 
         public Level() {       
             Amount = 1;
             Experience = 0;
             ExpNeeding = 10;
-            Radiate = false;
+            TotalExperience = 0;
         }
 
         public bool AddExp(int count = 1) {
             Experience += count;
+            TotalExperience += count;
             if(Experience >= ExpNeeding) {
-                Experience = 0;
+                Experience = Experience - ExpNeeding;
                 Amount++;
                 ExpNeeding = Convert.ToInt32(ExpNeeding * 1.25);
                 return true;

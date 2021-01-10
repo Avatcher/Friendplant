@@ -20,8 +20,9 @@ namespace Friendplant.Commands {
             DiscordEmbedBuilder embed;
             embed = new DiscordEmbedBuilder {
                 Title = "Справочник по командам",
-                Description = $"**Создатель**: {ctx.Client.GetUserAsync(354297822691983371).Result.Mention}\n**Язык программирования**: C#\n**Библиотека**: [DSharpPlus](https://github.com/DSharpPlus)\n*v.0.0.3*",
-                Color = ctx.Guild.CurrentMember.Color
+                Description = $"**Создатель**: {ctx.Client.GetUserAsync(354297822691983371).Result.Mention}\n**Язык программирования**: C#\n**Библиотека**: [DSharpPlus](https://github.com/DSharpPlus)\n**Код бота**: [Github](https://github.com/Avatcher/Friendplant)\n*{TopSecret.Version}*",
+                Color = new DiscordColor(0x7289da),
+                ThumbnailUrl = ctx.Client.CurrentUser.AvatarUrl
             };
 
             string spisok = @$"`*profile` - Показывает ваш профиль
@@ -29,7 +30,7 @@ namespace Friendplant.Commands {
 `*profile.color <HEX color>` - Меняет цвет вашего профиля
 `*transfer <User/Id> <Amount>` - Переводит {Vars.Emoji["sparkle"]}блестяшки на счет пользователя
 `*casino` - Казино. Стоит 2{Vars.Emoji["sparkle"]}, джекпот 30{Vars.Emoji["sparkle"]}";
-            embed.AddField("Капитал", spisok, true);     
+            embed.AddField("Профиль", spisok, true);     
                     
             await ctx.Channel.SendMessageAsync(embed: embed);
         } 
@@ -106,5 +107,96 @@ namespace Friendplant.Commands {
                 Color = new DiscordColor(color)
             });
         }
+    
+        [Command("top")]
+        public async Task CTop(CommandContext ctx, string mode = null) {
+
+            new Profile(ctx.User);
+
+            Profile[] profilesArr = new Profile[Vars.Humanity.Count];
+            Vars.Humanity.Values.CopyTo(profilesArr, 0);
+            Profile temp; int userIndex = 999; string top = "";
+            DiscordEmbedBuilder embed;
+            DiscordUser usr;
+
+            switch(mode.ToLower()) {
+
+                case "level":
+
+                    profilesArr = Sorting.GetHumanityTop(Sorting.By.Exp);
+                    userIndex = Array.IndexOf(profilesArr, Vars.Humanity[ctx.User.Id]);
+
+                    for(int i = 0; i < profilesArr.Length; i++) {
+
+                        usr = ctx.Client.GetUserAsync(profilesArr[i].Id).GetAwaiter().GetResult();
+
+                        if(i == 0)      top += $"{Vars.Emoji["medal1"]} - `{profilesArr[i].Level.Amount}`УР(`{profilesArr[i].Level.TotalExperience}`{Vars.Emoji["bexp"]}) - {usr.Mention}\n";
+                        else if(i == 1) top += $"{Vars.Emoji["medal2"]} - `{profilesArr[i].Level.Amount}`УР(`{profilesArr[i].Level.TotalExperience}`{Vars.Emoji["bexp"]}) - {usr.Mention}\n";
+                        else if(i == 2) top += $"{Vars.Emoji["medal3"]} - `{profilesArr[i].Level.Amount}`УР(`{profilesArr[i].Level.TotalExperience}`{Vars.Emoji["bexp"]}) - {usr.Mention}\n";
+                        else            top += $"**{i+1}** - `{profilesArr[userIndex].Level.Amount}`УР(`{profilesArr[userIndex].Level.TotalExperience}`{Vars.Emoji["bexp"]}) - {usr.Mention} \n";
+                    }
+
+                    if(userIndex == 0)      top += $"\nВаше место: {Vars.Emoji["medal1"]}**{userIndex+1}** - {ctx.User.Mention} - `{profilesArr[userIndex].Level.Amount}`:`{profilesArr[userIndex].Level.TotalExperience}`";
+                    else if(userIndex == 1) top += $"\nВаше место: {Vars.Emoji["medal2"]}**{userIndex+1}** - {ctx.User.Mention} - `{profilesArr[userIndex].Level.Amount}`:`{profilesArr[userIndex].Level.TotalExperience}`";
+                    else if(userIndex == 2) top += $"\nВаше место: {Vars.Emoji["medal3"]}**{userIndex+1}** - {ctx.User.Mention} - `{profilesArr[userIndex].Level.Amount}`:`{profilesArr[userIndex].Level.TotalExperience}`";
+                    else                    top += $"\nВаше место: {Vars.Emoji["medal4"]}**{userIndex+1}** - {ctx.User.Mention} - `{profilesArr[userIndex].Level.Amount}`:`{profilesArr[userIndex].Level.TotalExperience}`";
+
+                    embed = new DiscordEmbedBuilder {
+                        Title = "Таблица лидеров по уровню",
+                        Description = top,
+                        Color = new DiscordColor(0x7289da)
+                    };
+
+                    await ctx.Channel.SendMessageAsync(embed:embed);
+
+                    break;
+
+                case "money":
+
+                    profilesArr = Sorting.GetHumanityTop(Sorting.By.Money);
+                    userIndex = Array.IndexOf(profilesArr, Vars.Humanity[ctx.User.Id]);
+
+                    for(int i = 0; i < profilesArr.Length; i++) {
+                        usr = ctx.Client.GetUserAsync(profilesArr[i].Id).Result;
+
+                        if(i == 0)      top += $"{Vars.Emoji["medal1"]} - `{profilesArr[i].Balance.Money}`{Vars.Emoji["sparkle"]} - {usr.Mention}\n";
+                        else if(i == 1) top += $"{Vars.Emoji["medal2"]} - `{profilesArr[i].Balance.Money}`{Vars.Emoji["sparkle"]} - {usr.Mention}\n";
+                        else if(i == 2) top += $"{Vars.Emoji["medal3"]} - `{profilesArr[i].Balance.Money}`{Vars.Emoji["sparkle"]} - {usr.Mention}\n";
+                        else            top += $"**{i+1}** - `{profilesArr[i].Balance.Money}`{Vars.Emoji["sparkle"]} - {usr.Mention}\n";
+                    }
+                    if     (userIndex == 0) top += $"\nВаше место: {Vars.Emoji["medal1"]} - `{profilesArr[userIndex].Balance.Money}`{Vars.Emoji["sparkle"]} - {ctx.User.Mention}";
+                    else if(userIndex == 1) top += $"\nВаше место: {Vars.Emoji["medal2"]} - `{profilesArr[userIndex].Balance.Money}`{Vars.Emoji["sparkle"]} - {ctx.User.Mention}";
+                    else if(userIndex == 2) top += $"\nВаше место: {Vars.Emoji["medal3"]} - `{profilesArr[userIndex].Balance.Money}`{Vars.Emoji["sparkle"]} - {ctx.User.Mention}";
+                    else                    top += $"\nВаше место: {Vars.Emoji["medal4"]}**{userIndex+1}** - `{profilesArr[userIndex].Balance.Money}`{Vars.Emoji["sparkle"]} - {ctx.User.Mention}";
+
+                    embed = new DiscordEmbedBuilder {
+                        Title = "Таблица лидеров по блестяшкам",
+                        Description = top,
+                        Color = new DiscordColor(0x7289da)
+                    };
+
+                    await ctx.Channel.SendMessageAsync(embed: embed);
+
+                    break;
+
+                default:
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = $":no_entry: Неизвестный рейтинг \"{mode}\",\nУ нас есть только `Level` и `Money`",
+                        Color = new DiscordColor(0xbe1931)
+                    });
+                    return;
+            }
+            
+        }
+    
+        [Command("emojis")]
+        public async Task CEMojis(CommandContext ctx) {
+            string res = "";
+            foreach(string emoji in Vars.Emoji.Values) {
+                res += emoji;
+            }
+            await ctx.Channel.SendMessageAsync(res);
+        }
+    
     }
 }

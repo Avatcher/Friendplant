@@ -7,6 +7,7 @@ using Friendplant.Data.ProfileElements;
 namespace Friendplant.Data {
     [Serializable]
     public class Profile {
+        public ulong Id { get; private set; }
         public Balance Balance { get; set; }
         public Level Level { get; set; }
         public int Color { get; set; }
@@ -14,7 +15,9 @@ namespace Friendplant.Data {
 
         public Profile(DiscordUser user) {
             if(user.IsBot) throw new ArgumentException("Bot can't have got own profile.");
-            if(Vars.Humanity.ContainsKey(user.Id)) return; 
+            if(Vars.Humanity.ContainsKey(user.Id)) return;
+
+            Id = user.Id;
 
             Balance = new Balance();
             Level = new Level();

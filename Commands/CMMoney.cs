@@ -51,8 +51,8 @@ namespace Friendplant.Commands {
             Vars.Humanity[user.Id].Balance.Transfer(count, new HistoryElement(Vars.Humanity[user.Id].Balance, "+" + count, "Перевод от " + ctx.User.Mention), false);
 
             await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
-                Title = $":moneybag: Перевод `{count}`{Vars.Emoji["sparkle"]} блестяшек на {user.Mention}.",
-                Color = DiscordColor.Green
+                Title = $":moneybag: Перевод `{count}`{Vars.Emoji["sparkle"]} блестяшек прошел успешно.",
+                Color = new DiscordColor(0x7289da)
             });
         }
 
