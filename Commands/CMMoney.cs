@@ -106,9 +106,9 @@ namespace Friendplant.Commands {
                         break;
                 }
                 win = true;
-                Vars.Humanity[ctx.User.Id].Balance.Transfer(-30, new HistoryElement(Vars.Humanity[ctx.User.Id].Balance, "+30", "Джекпот в казино"), false);
+                Vars.Humanity[ctx.User.Id].Balance.Transfer(30, new HistoryElement(Vars.Humanity[ctx.User.Id].Balance, "+30", "Джекпот в казино"), false);
             }
-            else Vars.Humanity[ctx.User.Id].Balance.Transfer(2, new HistoryElement(Vars.Humanity[ctx.User.Id].Balance, "-2", "Проигрыш в казино"), true);
+            else Vars.Humanity[ctx.User.Id].Balance.Transfer(-2, new HistoryElement(Vars.Humanity[ctx.User.Id].Balance, "-2", "Проигрыш в казино"), true);
 
             var embed = new DiscordEmbedBuilder {
                 Title = result,
