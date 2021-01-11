@@ -1,3 +1,4 @@
+![Title](https://github.com/Avatcher/Friendplant/blob/main/assets/titles/01.png)
 
 # Friendplant
 
