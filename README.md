@@ -1,4 +1,3 @@
-![Title](https://github.com/Avatcher/Friendplant/blob/main/assets/avatars/FP_avatar_01_title.png)
 
 # Friendplant
 
