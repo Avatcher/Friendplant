@@ -1,7 +1,5 @@
 ![Title](https://github.com/Avatcher/Friendplant/blob/main/assets/titles/01.png)
 
-# Friendplant
-
 ### Русский
 Это код моего дискорд бота для сервера Crumden. Пожалуйста, перед тем как анализировать код, проверьте, соотвествует ли версия (Data/Vars.cs Version) версии выводимой командой <b>*help</b>.
 
