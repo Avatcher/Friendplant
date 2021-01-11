@@ -12,11 +12,14 @@ namespace Friendplant.Data.ProfileElements {
 
         public int TotalExperience { get; set; }
 
+        public bool Muted { get; set; }
+
         public Level() {       
             Amount = 1;
             Experience = 0;
             ExpNeeding = 10;
             TotalExperience = 0;
+            Muted = false;
         }
 
         public bool AddExp(int count = 1) {

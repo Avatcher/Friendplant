@@ -13,26 +13,22 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 
 namespace Friendplant {
-    public class TopSecret {
 
-        public const string Token = "Token";
-        public const string Prefix = "*";
-        public const ulong AvatcherId = 354297822691983371;
-        public const string Version = "1.0.7";
-    }
     class Bot {
         public DiscordClient Client { get; private set; }
         public CommandsNextModule CommandsModule { get; private set; }
 
         private bool DoAutosave;
-        private int AutosaveEveryHeartbeat = 3;
+        private int AutosaveEveryHeartbeat = 5;
         private int AutosaveIn = 0;
+
+        private static List<ulong> VoiceCreations = new List<ulong>();
 
         public async Task RunAsync() {
 
             // Creating Configuration
             var config = new DiscordConfiguration {
-                Token = TopSecret.Token,
+                Token = Vars.Token,
                 TokenType = TokenType.Bot,
 
                 AutoReconnect = true,
@@ -51,7 +47,7 @@ namespace Friendplant {
 
             // Creating Commands Configuration
             var commandsConfig = new CommandsNextConfiguration {
-                StringPrefix = TopSecret.Prefix,
+                StringPrefix = Vars.Prefix,
                 IgnoreExtraArguments = false,
                 EnableMentionPrefix = true,   // Allow to use @Friendplant as prefix
                 EnableDefaultHelp = false     // Disable default help command
@@ -144,6 +140,11 @@ namespace Friendplant {
                 user_status: UserStatus.Online
                 );
 
+            // Voice Creations
+            foreach(DiscordChannel c in Client.GetChannelAsync(798144564933951538).Result.Children) {
+                VoiceCreations.Add(c.Id);
+            }
+
             // Do Autosave
             DoAutosave = true;
 
@@ -202,7 +203,8 @@ namespace Friendplant {
                 int blesk = Convert.ToInt32(5 * 0.5 * Vars.Humanity[e.Author.Id].Level.Amount); // Prize sparkles
                 Vars.Humanity[e.Author.Id].Balance.Transfer(blesk, new HistoryElement(Vars.Humanity[e.Author.Id].Balance, "+"+blesk, "Новый уровень"), false);
 
-                e.Channel.SendMessageAsync($"> :tada: Поздравляю, {e.Author.Mention}, ты достиг `{Vars.Humanity[e.Author.Id].Level.Amount}` уровня!\n> Ты получаешь `{blesk}`{Vars.Emoji["sparkle"]} блестяшек!");
+                if(!Vars.Humanity[e.Author.Id].Level.Muted) e.Channel.SendMessageAsync(
+                    $"> :tada: Поздравляю, {e.Author.Mention}, ты достиг `{Vars.Humanity[e.Author.Id].Level.Amount}` уровня!\n> Ты получаешь `{blesk}`{Vars.Emoji["sparkle"]} блестяшек!");
             }
 
             return Task.CompletedTask;

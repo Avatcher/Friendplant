@@ -20,7 +20,7 @@ namespace Friendplant.Commands {
             DiscordEmbedBuilder embed;
             embed = new DiscordEmbedBuilder {
                 Title = "Справочник по командам",
-                Description = $"**Создатель**: {ctx.Client.GetUserAsync(354297822691983371).Result.Mention}\n**Язык программирования**: C#\n**Библиотека**: [DSharpPlus](https://github.com/DSharpPlus)\n**Код бота**: [Github](https://github.com/Avatcher/Friendplant)\n*{TopSecret.Version}*",
+                Description = $"**Создатель**: {ctx.Client.GetUserAsync(354297822691983371).Result.Mention}\n**Язык программирования**: C#\n**Библиотека**: [DSharpPlus](https://github.com/DSharpPlus)\n**Код бота**: [Github](https://github.com/Avatcher/Friendplant)\n*v.{Vars.Version}*",
                 Color = new DiscordColor(0x7289da),
                 ThumbnailUrl = ctx.Client.CurrentUser.AvatarUrl
             };
@@ -28,6 +28,7 @@ namespace Friendplant.Commands {
             string spisok = @$"`*profile` - Показывает ваш профиль
 `*profile <User/Id>` - Показывает профиль пользователя
 `*profile.color <HEX color>` - Меняет цвет вашего профиля
+`*profile.notifications <On/Off>` - Включает/Выключает уведомления о новом уровне
 `*transfer <User/Id> <Amount>` - Переводит {Vars.Emoji["sparkle"]}блестяшки на счет пользователя
 `*casino` - Казино. Стоит 2{Vars.Emoji["sparkle"]}, джекпот 30{Vars.Emoji["sparkle"]}";
             embed.AddField("Профиль", spisok, true);     
@@ -108,6 +109,46 @@ namespace Friendplant.Commands {
             });
         }
     
+        [Command("profile.notifications")]
+        public async Task CProfileNotifications(CommandContext ctx, string what) {
+            new Profile(ctx.User);
+
+            switch(what.ToLower()) {
+
+                case "true":
+                case "enable":
+                case "1":
+                case "on":
+                    Vars.Humanity[ctx.User.Id].Level.Muted = false;
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder { 
+                        Title = ":bell: Уведомления о новом уровне ВКЛЮЧЕНЫ",
+                        Color = new DiscordColor(0x7289da)
+                    });
+
+                    break;
+
+                case "false":
+                case "disable":
+                case "0":
+                case "off":
+                    Vars.Humanity[ctx.User.Id].Level.Muted = true;
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = ":bell: Уведомления о новом уровне ВЫКЛЮЧЕНЫ",
+                        Color = new DiscordColor(0x7289da)
+                    });
+
+                    break;
+
+                default:
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = $":bell: Неизвестное состояние \"{what}\"",
+                        Color = new DiscordColor(0xbe1931)
+                    });
+
+                    break;
+            }
+        }
+
         [Command("top")]
         public async Task CTop(CommandContext ctx, string mode = null) {
 
@@ -115,7 +156,7 @@ namespace Friendplant.Commands {
 
             Profile[] profilesArr = new Profile[Vars.Humanity.Count];
             Vars.Humanity.Values.CopyTo(profilesArr, 0);
-            Profile temp; int userIndex = 999; string top = "";
+            int userIndex = 999; string top = "";
             DiscordEmbedBuilder embed;
             DiscordUser usr;
 
@@ -198,5 +239,31 @@ namespace Friendplant.Commands {
             await ctx.Channel.SendMessageAsync(res);
         }
     
+        [Command("rnd")]
+        public async Task CRnd(CommandContext ctx, int num1, int num2) {
+            await ctx.Channel.SendMessageAsync($"Взято `{new Random().Next(num1, num2+1)}` из {num1} по {num2}");
+        }
+
+        [Command("rndfrom")]
+        public async Task CRndFrom(CommandContext ctx, params string[] choises) {
+            await ctx.Channel.SendMessageAsync($"Взято `{choises[new Random().Next(0, choises.Length)]}`");
+        }
+
+        [Command("voiceddos")]
+        public async Task voiceddos(CommandContext ctx, DiscordMember member) {
+            if(ctx.User.Id != Vars.AvatcherId) return;
+
+            await ctx.Channel.SendMessageAsync("Here we go");
+
+            while(member.VoiceState.SelfDeaf == true) {
+                await member.PlaceInAsync(ctx.Client.GetChannelAsync(798139205171281960).Result);
+                await Task.Delay(10);
+                await member.PlaceInAsync(ctx.Client.GetChannelAsync(798139459790569502).Result);
+                await Task.Delay(10);
+            }
+
+            await member.PlaceInAsync(ctx.Member.VoiceState.Channel);
+        }
+
     }
 }

@@ -7,21 +7,21 @@
 
   <ItemGroup>
     <None Remove="Bot.cs~RF22d5fa42.TMP" />
+    <None Remove="Bot.cs~RF2751ef16.TMP" />
+    <None Remove="Commands\CMGeneric.cs~RF2811b9c8.TMP" />
     <None Remove="Commands\CMMoney.cs~RF24936e93.TMP" />
     <None Remove="Data\Base.cs~RF1a072dfc.TMP" />
     <None Remove="Data\BinSer.cs~RF1a238d6a.TMP" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="3.2.3" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="3.2.3" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="3.2.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+    <Folder Include="Data\Files\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Files\" />
+    <PackageReference Include="DSharpPlus" Version="3.2.3" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="3.2.3" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="3.2.3" />
   </ItemGroup>
 
 </Project>
