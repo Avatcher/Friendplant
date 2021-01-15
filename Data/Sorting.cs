@@ -20,7 +20,7 @@ namespace Friendplant.Data {
 
                     for(int j = i + 1; j < profilesArr.Length; j++) {
 
-                        if(profilesArr[i].Balance.Money > profilesArr[j].Balance.Money) {
+                        if(profilesArr[i].Balance.Money < profilesArr[j].Balance.Money) {
                             temp = profilesArr[i];
                             profilesArr[i] = profilesArr[j];
                             profilesArr[j] = temp;
@@ -33,7 +33,7 @@ namespace Friendplant.Data {
 
                     for(int j = i + 1; j < profilesArr.Length; j++) {
 
-                        if(profilesArr[i].Level.TotalExperience > profilesArr[j].Level.TotalExperience) {
+                        if(profilesArr[i].Level.TotalExperience < profilesArr[j].Level.TotalExperience) {
                             temp = profilesArr[i];
                             profilesArr[i] = profilesArr[j];
                             profilesArr[j] = temp;
@@ -42,7 +42,6 @@ namespace Friendplant.Data {
                 }
             }
 
-            Array.Reverse(profilesArr);
             return profilesArr;     
         }
 

@@ -15,25 +15,113 @@ namespace Friendplant.Commands {
     public class CMGeneric {
 
         [Command("help")]
-        public async Task CHelp(CommandContext ctx) {
+        public async Task CHelp(CommandContext ctx, string command = null) {
 
-            DiscordEmbedBuilder embed;
-            embed = new DiscordEmbedBuilder {
-                Title = "Справочник по командам",
-                Description = $"**Создатель**: {ctx.Client.GetUserAsync(354297822691983371).Result.Mention}\n**Язык программирования**: C#\n**Библиотека**: [DSharpPlus](https://github.com/DSharpPlus)\n**Код бота**: [Github](https://github.com/Avatcher/Friendplant)\n*v.{Vars.Version}*",
-                Color = new DiscordColor(0x7289da),
-                ThumbnailUrl = ctx.Client.CurrentUser.AvatarUrl
-            };
+            switch(command) {
 
-            string spisok = @$"`*profile` - Показывает ваш профиль
-`*profile <User/Id>` - Показывает профиль пользователя
-`*profile.color <HEX color>` - Меняет цвет вашего профиля
-`*profile.notifications <On/Off>` - Включает/Выключает уведомления о новом уровне
-`*transfer <User/Id> <Amount>` - Переводит {Vars.Emoji["sparkle"]}блестяшки на счет пользователя
-`*casino` - Казино. Стоит 2{Vars.Emoji["sparkle"]}, джекпот 30{Vars.Emoji["sparkle"]}";
-            embed.AddField("Профиль", spisok, true);     
-                    
-            await ctx.Channel.SendMessageAsync(embed: embed);
+                case null:
+                    DiscordEmbedBuilder embed;
+                    embed = new DiscordEmbedBuilder {
+                        Title = "Справочник по командам",
+                        Description = $"**Создатель**: {ctx.Client.GetUserAsync(354297822691983371).Result.Mention}\n**Язык программирования**: C#\n**Библиотека**: [DSharpPlus](https://github.com/DSharpPlus)\n**Код бота**: [Github](https://github.com/Avatcher/Friendplant)\n*v.{Vars.Version}*",
+                        Color = Vars.ColorBlue,
+                        ThumbnailUrl = ctx.Client.CurrentUser.AvatarUrl
+                    };
+
+                    embed.AddField("Также...", "Для дополнительной ифнормации о команде введите `*help <Команда>`.", false);
+
+                    string spisok = "```\n*profile\n*profile.color\n*profile.notice\n```";
+                    embed.AddField("Профиль", spisok, true);
+
+                    spisok = "```\n*transfer\n*casino\n*shop\n*buy\n```";
+                    embed.AddField("Блестяшки", spisok, true);
+
+                    spisok = "```\n*rnd\n*rndfrom\n```";
+                    embed.AddField("Рандом", spisok, true);
+
+                    await ctx.Channel.SendMessageAsync(embed: embed);
+                    break;
+
+                case "profile":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Профиль",
+                        Description = $"`*profile` - Показывает ваш профиль.\n`*profile <User>` - Показывает профиль пользователя.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "profile.color":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Профиль",
+                        Description = $"`*profile.color <HEX>` - Меняет цвет оконтовки вашего профиля. Цвет должен быть в формате HEX.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "profile.notice":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Профиль",
+                        Description = $"`*profile.notice <ON/OFF>` - Включает/Выключает сообщения Бота о новом уровне.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "transfer":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Блестяшки",
+                        Description = $"`*transfer <User> <Amount>` - Переводит блестяшки на счет другого пользователя.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "casino":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Блестяшки",
+                        Description = $"`*casino` - Стоит `2`блестяшки, Джекпот `20`блестяшек.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "shop":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Блестяшки",
+                        Description = $"`*shop` - Выводит магазин со списком его товаров.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "buy":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Блестяшки",
+                        Description = $"`*buy <Number>` - Покупает предмет из магазина под номером Number.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "rnd":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Рандом",
+                        Description = $"`*rnd <num1> <num2>` - Выводит случайное число между num1 и num2.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "rndfrom":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Рандом",
+                        Description = $"`*rndfrom <word1> <word2> ...` - Выдает случайное слово из списка, \"используйте кавычки для нескольких слов\"",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                default:
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = $":bell: Неизвестная команда \"{command}\"",
+                        Color = Vars.ColorRed
+                    });
+                    break;
+            }
+            
         } 
 
         [Command("profile")]
@@ -51,7 +139,22 @@ namespace Friendplant.Commands {
 
             Profile pro = Vars.Humanity[user.Id];
 
+            string MoneyRank;
+            int MoneyIndex = Array.IndexOf(Sorting.GetHumanityTop(Sorting.By.Money), pro);
+            if(MoneyIndex == 0) MoneyRank = Vars.Emoji["medal1"];
+            else if(MoneyIndex == 1) MoneyRank = Vars.Emoji["medal2"];
+            else if(MoneyIndex == 2) MoneyRank = Vars.Emoji["medal3"];
+            else MoneyRank = Vars.Emoji["medal4"] + Convert.ToString(MoneyIndex+1);
+
+            string ExpRank;
+            int ExpIndex   = Array.IndexOf(Sorting.GetHumanityTop(Sorting.By.Exp), pro);
+            if(ExpIndex == 0) ExpRank = Vars.Emoji["medal1"];
+            else if(ExpIndex == 1) ExpRank = Vars.Emoji["medal2"];
+            else if(ExpIndex == 2) ExpRank = Vars.Emoji["medal3"];
+            else ExpRank = Vars.Emoji["medal4"] + Convert.ToString(ExpIndex + 1);
+
             string sparkle = pro.Radioactive ? Vars.Emoji["pluto"] : Vars.Emoji["sparkle"];
+            string exp = pro.Radioactive ? Vars.Emoji["gexp"] : Vars.Emoji["bexp"];
 
             var embed = new DiscordEmbedBuilder {
                 Author = new DiscordEmbedBuilder.EmbedAuthor{
@@ -65,9 +168,9 @@ namespace Friendplant.Commands {
                 }
             };
 
-            embed.AddField($"Баланс: `{pro.Balance.Money}`{sparkle}", $"Потрачено: `{pro.Balance.Spent}`{sparkle}", true);
+            embed.AddField($"{MoneyRank} Баланс: `{pro.Balance.Money}`{sparkle}", $"Потрачено: `{pro.Balance.Spent}`{sparkle}", true);
 
-            embed.AddField($"Уровень: `{pro.Level.Amount}`", $"Опыт: `{pro.Level.Experience}`/`{pro.Level.ExpNeeding}`", true);
+            embed.AddField($"{ExpRank} Уровень: `{pro.Level.Amount}`", $"Опыт: `{pro.Level.Experience}`/`{pro.Level.ExpNeeding}`{exp}", true);
 
             var his = pro.Balance.History;
             string historyString = "";
@@ -109,7 +212,7 @@ namespace Friendplant.Commands {
             });
         }
     
-        [Command("profile.notifications")]
+        [Command("profile.notice")]
         public async Task CProfileNotifications(CommandContext ctx, string what) {
             new Profile(ctx.User);
 
@@ -122,7 +225,7 @@ namespace Friendplant.Commands {
                     Vars.Humanity[ctx.User.Id].Level.Muted = false;
                     await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder { 
                         Title = ":bell: Уведомления о новом уровне ВКЛЮЧЕНЫ",
-                        Color = new DiscordColor(0x7289da)
+                        Color = Vars.ColorBlue
                     });
 
                     break;
@@ -134,7 +237,7 @@ namespace Friendplant.Commands {
                     Vars.Humanity[ctx.User.Id].Level.Muted = true;
                     await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
                         Title = ":bell: Уведомления о новом уровне ВЫКЛЮЧЕНЫ",
-                        Color = new DiscordColor(0x7289da)
+                        Color = Vars.ColorBlue
                     });
 
                     break;
@@ -142,7 +245,7 @@ namespace Friendplant.Commands {
                 default:
                     await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
                         Title = $":bell: Неизвестное состояние \"{what}\"",
-                        Color = new DiscordColor(0xbe1931)
+                        Color = Vars.ColorRed
                     });
 
                     break;
@@ -171,21 +274,21 @@ namespace Friendplant.Commands {
 
                         usr = ctx.Client.GetUserAsync(profilesArr[i].Id).GetAwaiter().GetResult();
 
-                        if(i == 0)      top += $"{Vars.Emoji["medal1"]} - `{profilesArr[i].Level.Amount}`УР(`{profilesArr[i].Level.TotalExperience}`{Vars.Emoji["bexp"]}) - {usr.Mention}\n";
-                        else if(i == 1) top += $"{Vars.Emoji["medal2"]} - `{profilesArr[i].Level.Amount}`УР(`{profilesArr[i].Level.TotalExperience}`{Vars.Emoji["bexp"]}) - {usr.Mention}\n";
-                        else if(i == 2) top += $"{Vars.Emoji["medal3"]} - `{profilesArr[i].Level.Amount}`УР(`{profilesArr[i].Level.TotalExperience}`{Vars.Emoji["bexp"]}) - {usr.Mention}\n";
-                        else            top += $"**{i+1}** - `{profilesArr[userIndex].Level.Amount}`УР(`{profilesArr[userIndex].Level.TotalExperience}`{Vars.Emoji["bexp"]}) - {usr.Mention} \n";
+                        if(i == 0)      top += $"{Vars.Emoji["medal1"]} - `{profilesArr[i].Level.Amount}`УР - {usr.Mention}\n";
+                        else if(i == 1) top += $"{Vars.Emoji["medal2"]} - `{profilesArr[i].Level.Amount}`УР - {usr.Mention}\n";
+                        else if(i == 2) top += $"{Vars.Emoji["medal3"]} - `{profilesArr[i].Level.Amount}`УР - {usr.Mention}\n";
+                        else            top += $"**{i+1}** - `{profilesArr[i].Level.Amount}`УР - {usr.Mention} \n";
                     }
 
-                    if(userIndex == 0)      top += $"\nВаше место: {Vars.Emoji["medal1"]}**{userIndex+1}** - {ctx.User.Mention} - `{profilesArr[userIndex].Level.Amount}`:`{profilesArr[userIndex].Level.TotalExperience}`";
-                    else if(userIndex == 1) top += $"\nВаше место: {Vars.Emoji["medal2"]}**{userIndex+1}** - {ctx.User.Mention} - `{profilesArr[userIndex].Level.Amount}`:`{profilesArr[userIndex].Level.TotalExperience}`";
-                    else if(userIndex == 2) top += $"\nВаше место: {Vars.Emoji["medal3"]}**{userIndex+1}** - {ctx.User.Mention} - `{profilesArr[userIndex].Level.Amount}`:`{profilesArr[userIndex].Level.TotalExperience}`";
-                    else                    top += $"\nВаше место: {Vars.Emoji["medal4"]}**{userIndex+1}** - {ctx.User.Mention} - `{profilesArr[userIndex].Level.Amount}`:`{profilesArr[userIndex].Level.TotalExperience}`";
+                    if(userIndex == 0)      top += $"\nВаше место: {Vars.Emoji["medal1"]}**{userIndex+1}** - `{profilesArr[userIndex].Level.Amount}`УР - {ctx.User.Mention}";
+                    else if(userIndex == 1) top += $"\nВаше место: {Vars.Emoji["medal2"]}**{userIndex+1}** - `{profilesArr[userIndex].Level.Amount}`УР - {ctx.User.Mention}";
+                    else if(userIndex == 2) top += $"\nВаше место: {Vars.Emoji["medal3"]}**{userIndex+1}** - `{profilesArr[userIndex].Level.Amount}`УР - {ctx.User.Mention}";
+                    else                    top += $"\nВаше место: {Vars.Emoji["medal4"]}**{userIndex+1}** - `{profilesArr[userIndex].Level.Amount}`УР - {ctx.User.Mention}";
 
                     embed = new DiscordEmbedBuilder {
                         Title = "Таблица лидеров по уровню",
                         Description = top,
-                        Color = new DiscordColor(0x7289da)
+                        Color = Vars.ColorBlue
                     };
 
                     await ctx.Channel.SendMessageAsync(embed:embed);
@@ -213,7 +316,7 @@ namespace Friendplant.Commands {
                     embed = new DiscordEmbedBuilder {
                         Title = "Таблица лидеров по блестяшкам",
                         Description = top,
-                        Color = new DiscordColor(0x7289da)
+                        Color = Vars.ColorBlue
                     };
 
                     await ctx.Channel.SendMessageAsync(embed: embed);
@@ -223,7 +326,7 @@ namespace Friendplant.Commands {
                 default:
                     await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
                         Title = $":no_entry: Неизвестный рейтинг \"{mode}\",\nУ нас есть только `Level` и `Money`",
-                        Color = new DiscordColor(0xbe1931)
+                        Color = Vars.ColorRed
                     });
                     return;
             }
@@ -247,22 +350,6 @@ namespace Friendplant.Commands {
         [Command("rndfrom")]
         public async Task CRndFrom(CommandContext ctx, params string[] choises) {
             await ctx.Channel.SendMessageAsync($"Взято `{choises[new Random().Next(0, choises.Length)]}`");
-        }
-
-        [Command("voiceddos")]
-        public async Task voiceddos(CommandContext ctx, DiscordMember member) {
-            if(ctx.User.Id != Vars.AvatcherId) return;
-
-            await ctx.Channel.SendMessageAsync("Here we go");
-
-            while(member.VoiceState.SelfDeaf == true) {
-                await member.PlaceInAsync(ctx.Client.GetChannelAsync(798139205171281960).Result);
-                await Task.Delay(10);
-                await member.PlaceInAsync(ctx.Client.GetChannelAsync(798139459790569502).Result);
-                await Task.Delay(10);
-            }
-
-            await member.PlaceInAsync(ctx.Member.VoiceState.Channel);
         }
 
     }

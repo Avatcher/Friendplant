@@ -17,7 +17,7 @@ namespace Friendplant.Data.ProfileElements {
         public Level() {       
             Amount = 1;
             Experience = 0;
-            ExpNeeding = 10;
+            ExpNeeding = 15;
             TotalExperience = 0;
             Muted = false;
         }
