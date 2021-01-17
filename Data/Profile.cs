@@ -12,6 +12,7 @@ namespace Friendplant.Data {
         public Level Level { get; set; }
         public int Color { get; set; }
         public bool Radioactive { get; set; }
+
         public List<ulong> Items = new List<ulong>();
 
         public Profile(DiscordUser user) {

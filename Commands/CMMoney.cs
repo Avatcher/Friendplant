@@ -9,6 +9,8 @@ using Friendplant.Data.ProfileElements;
 using DSharpPlus.Entities;
 using System.Text.RegularExpressions;
 using DSharpPlus.Interactivity;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Friendplant.Commands {
     public class CMMoney {
@@ -88,7 +90,7 @@ namespace Friendplant.Commands {
             if(Vars.Humanity[ctx.User.Id].Balance.Money < 2 && !Vars.Humanity[ctx.User.Id].Radioactive) {
                 await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
                     Title = ":moneybag: На вашем балансе недостаточно блестяшек.",
-                    Color = new DiscordColor(0xdd2e44)
+                    Color = Vars.ColorRed
                 });
                 return;
             }
@@ -147,7 +149,7 @@ namespace Friendplant.Commands {
         [Command("shop")]
         public async Task CShop(CommandContext ctx) {
             var embed = new DiscordEmbedBuilder {
-                Title = ":convenience_store: Магазин",
+                Title = ":shopping_cart: Магазин",
                 Description = "Что-бы что-нибудь купить, введите `*buy <Номер товара>`.",
                 Color = Vars.ColorBlue
             };
@@ -185,8 +187,8 @@ namespace Friendplant.Commands {
             if(num <= 0 || num > i) {
                 Console.WriteLine("bruh");
                 await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
-                    Title = $":convenience_store: В магазине нету товара под номером `{num}`",
-                    Color = new DiscordColor(0xdd2e44)
+                    Title = $":shopping_cart: В магазине нету товара под номером `{num}`",
+                    Color = Vars.ColorRed
                 });
                 return;
             }
@@ -194,8 +196,8 @@ namespace Friendplant.Commands {
             // Member already have item
             if(Vars.Humanity[ctx.User.Id].Items.Contains(dict[num]) && list.Contains(Vars.Shop[dict[num]].Id)) {
                 await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
-                    Title = $":convenience_store: У вас уже есть этот предмет.",
-                    Color = new DiscordColor(0xdd2e44)
+                    Title = $":shopping_cart: У вас уже есть этот предмет.",
+                    Color = Vars.ColorRed
                 });
                 return;
             }
@@ -203,7 +205,7 @@ namespace Friendplant.Commands {
             // Item is in Member's profile, but member haven't role
             if(Vars.Humanity[ctx.User.Id].Items.Contains(dict[num]) && !list.Contains(Vars.Shop[dict[num]].Id)) {
                 msg = await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
-                    Title = "Подтверждение...",
+                    Title = ":shopping_cart: Подтверждение...",
                     Description = $"Кажется, вы уже покупали `{Vars.Shop[dict[num]].Name}` ранее, хотите востановить его?\n:white_check_mark: - для подтверждения.",
                     Color = Vars.ColorBlue
                 });
@@ -223,7 +225,7 @@ namespace Friendplant.Commands {
                     
                     await ctx.Member.GrantRoleAsync(ctx.Guild.GetRole(dict[num]));
                     await msg.ModifyAsync(embed: new DiscordEmbedBuilder {
-                        Title = ":convenience_store: Предмет успешно восстановлен.",
+                        Title = ":shopping_cart: Предмет успешно восстановлен.",
                         Description = "",
                         Color = Vars.ColorBlue
                     });
@@ -233,7 +235,7 @@ namespace Friendplant.Commands {
                 else {
                     await msg.DeleteAllReactionsAsync();
                     await msg.ModifyAsync(embed: new DiscordEmbedBuilder {
-                        Title = ":convenience_store: ВОССТАНОВЛЕНИЕ ОТМЕНЕНО.",
+                        Title = ":shopping_cart: ВОССТАНОВЛЕНИЕ ОТМЕНЕНО.",
                         Description = "",
                         Color = Vars.ColorRed
                     });
@@ -244,8 +246,8 @@ namespace Friendplant.Commands {
             // Not enough sparkles
             if(Vars.Humanity[ctx.User.Id].Balance.Money < Vars.Shop[dict[num]].Cost && !Vars.Humanity[ctx.User.Id].Radioactive) {
                 await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
-                    Title = $":convenience_store: У вас недостаточно блестяшек, чтобы купить этот предмет.",
-                    Color = new DiscordColor(0xdd2e44)
+                    Title = $":shopping_cart: У вас недостаточно блестяшек, чтобы купить этот предмет.",
+                    Color = Vars.ColorRed
                 });
                 return;
             }
@@ -253,7 +255,7 @@ namespace Friendplant.Commands {
             //// Buying item
 
             msg = await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
-                Title = "Подтвержение...",
+                Title = ":shopping_cart: Подтвержение...",
                 Description = $"Вы уверены, что хотите приобрести `{Vars.Shop[dict[num]].Name}` за `{Vars.Shop[dict[num]].Cost}`{Vars.Emoji["sparkle"]}блестяшек?\n:white_check_mark: - для подтверждения.",
                 Color = Vars.ColorBlue
             });
@@ -278,7 +280,7 @@ namespace Friendplant.Commands {
 
                 await msg.DeleteAllReactionsAsync();
                 await msg.ModifyAsync(embed: new DiscordEmbedBuilder {
-                    Title = ":convenience_store: Покупка прошла успешно!",
+                    Title = ":shopping_cart: Покупка прошла успешно!",
                     Description = "",
                     Color = Vars.ColorBlue
                 });
@@ -287,11 +289,74 @@ namespace Friendplant.Commands {
             else {
                 await msg.DeleteAllReactionsAsync();
                 await msg.ModifyAsync(embed: new DiscordEmbedBuilder {
-                    Title = ":convenience_store: ПОКУПКА ОТМЕНЕНА.",
+                    Title = ":shopping_cart: ПОКУПКА ОТМЕНЕНА.",
                     Description = "",
                     Color = Vars.ColorBlue
                 });
             }
+        }
+    
+        [Command("newcode")]
+        public async Task CNewCode(CommandContext ctx, int cost){
+            new Profile(ctx.User);
+
+            if(cost > Vars.Humanity[ctx.User.Id].Balance.Money && !Vars.Humanity[ctx.User.Id].Radioactive){
+                await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                    Title = $":convenience_store: У вас недостаточно блестяшек, чтобы создать этот подарочный код.",
+                    Color = Vars.ColorRed
+                });
+            }
+            if(cost <= 0) {
+                await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                    Title = $":convenience_store: Ты... Это так не работает...",
+                    Color = Vars.ColorRed
+                });
+            }
+
+            var cde = new PrizeCode(ctx.User, cost);
+
+            var dm = await ctx.Client.CreateDmAsync(ctx.User);
+            await dm.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                Title = $"Код: ||{cde.Code}||",
+                Description = $"`*usecode <CODE>` - Чтобы использовать код.",
+                Color = Vars.ColorBlue
+            });
+            await dm.DeleteAsync();
+
+            await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                Title = ":label: Подарочный код был отправлен в личные сообщения.",
+                Color = Vars.ColorBlue
+            });
+
+            File.WriteAllText(Vars.CodesPath, JsonConvert.SerializeObject(Vars.Codes));
+        }
+    
+        [Command("usecode")]
+        public async Task CUseCode(CommandContext ctx, string code){
+            new Profile(ctx.User);
+
+            code = code.ToUpper();
+
+            List<string> codesList = new List<string>();
+            foreach(string key in Vars.Codes.Keys) {
+                codesList.Add(key);
+            }
+
+            if(!codesList.Contains(code)){
+                await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                    Title = $":label: Кажется, код \"**{code}**\" либо уже использован, либо никогда не существовал.",
+                    Color = Vars.ColorRed
+                });
+                return;
+            }
+
+            await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                Title = $":label: Вы получили `{Vars.Codes[code].Cost}`{Vars.Emoji["sparkle"]}блестяшек!",
+                Color = Vars.ColorBlue
+            });
+
+            Vars.Codes[code].Use(ctx.User);
+            File.WriteAllText(Vars.CodesPath, JsonConvert.SerializeObject(Vars.Codes));
         }
     }
 }

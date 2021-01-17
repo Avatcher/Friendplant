@@ -33,7 +33,7 @@ namespace Friendplant.Commands {
                     string spisok = "```\n*profile\n*profile.color\n*profile.notice\n```";
                     embed.AddField("Профиль", spisok, true);
 
-                    spisok = "```\n*transfer\n*casino\n*shop\n*buy\n```";
+                    spisok = "```\n*transfer\n*casino\n*shop\n*buy\n*newcode\n*usecode\n```";
                     embed.AddField("Блестяшки", spisok, true);
 
                     spisok = "```\n*rnd\n*rndfrom\n```";
@@ -94,6 +94,22 @@ namespace Friendplant.Commands {
                     await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
                         Title = "Блестяшки",
                         Description = $"`*buy <Number>` - Покупает предмет из магазина под номером Number.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "newcode":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Блестяшки",
+                        Description = $"`*newcode <Amount>` - Создает подарочный код, который смогут использовать другие люди и получить Amount блестяшек.",
+                        Color = Vars.ColorBlue
+                    });
+                    break;
+
+                case "usecode":
+                    await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                        Title = "Блестяшки",
+                        Description = $"`*usecode <Code>` - Использует подарочный код.",
                         Color = Vars.ColorBlue
                     });
                     break;

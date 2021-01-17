@@ -10,6 +10,7 @@
     <None Remove="Bot.cs~RF2751ef16.TMP" />
     <None Remove="Commands\CMGeneric.cs~RF2811b9c8.TMP" />
     <None Remove="Commands\CMMoney.cs~RF24936e93.TMP" />
+    <None Remove="Commands\CMMoney.cs~RF51ba3479.TMP" />
     <None Remove="Data\Base.cs~RF1a072dfc.TMP" />
     <None Remove="Data\BinSer.cs~RF1a238d6a.TMP" />
   </ItemGroup>
@@ -22,6 +23,7 @@
     <PackageReference Include="DSharpPlus" Version="3.2.3" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="3.2.3" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="3.2.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
 </Project>

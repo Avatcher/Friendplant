@@ -11,6 +11,7 @@ using Friendplant.Data.ProfileElements;
 using System.IO;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using Newtonsoft.Json;
 
 namespace Friendplant {
 
@@ -86,9 +87,9 @@ namespace Friendplant {
 
                     case "close":
                     case "c":
-                        BinSer.Serialize(Vars.Humanity, File.Open(Vars.HumanityPath, FileMode.Open));
+                        File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity));
                         Console.WriteLine(">> Humanity.bin was updated.");
-                        BinSer.Serialize(Vars.Shop, File.Open(Vars.ShopPath, FileMode.Open));
+                        File.WriteAllText(Vars.ShopPath, JsonConvert.SerializeObject(Vars.Shop));
                         Console.WriteLine(">> Shop.bin was updated.");
 
                         Console.WriteLine(">> Closing program...");
@@ -99,11 +100,11 @@ namespace Friendplant {
 
                     case "load":
                         if(answer[1].ToLower() == "humanity") {
-                            Vars.Humanity = BinSer.Deserialize<Dictionary<ulong, Profile>>(File.Open(Vars.HumanityPath, FileMode.Open));
+                            Vars.Humanity = JsonConvert.DeserializeObject<Dictionary<ulong, Profile>>(File.ReadAllText(Vars.HumanityPath));
                             Console.WriteLine(">> Humanity was loaded from the file.");
                         }
                         else if(answer[1].ToLower() == "shop") {
-                            Vars.Shop = BinSer.Deserialize<Dictionary<ulong, RoleItem>>(File.Open(Vars.ShopPath, FileMode.Open));
+                            Vars.Shop = JsonConvert.DeserializeObject<Dictionary<ulong, RoleItem>>(File.ReadAllText(Vars.ShopPath));
                             Console.WriteLine(">> Shop was loaded from the file.");
                         }
                         else {
@@ -112,21 +113,27 @@ namespace Friendplant {
                         break;
 
                     case "saveall":
-                        BinSer.Serialize(Vars.Humanity, File.Open(Vars.HumanityPath, FileMode.Open));
-                        Console.WriteLine(">> Humanity.bin was updated.");
-                        BinSer.Serialize(Vars.Shop, File.Open(Vars.ShopPath, FileMode.Open));
-                        Console.WriteLine(">> Shop.bin was updated.");
+                        File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity));
+                        Console.WriteLine(">> Humanity.json was updated.");
+                        File.WriteAllText(Vars.ShopPath, JsonConvert.SerializeObject(Vars.Shop));
+                        Console.WriteLine(">> Shop.json was updated.");
+                        File.WriteAllText(Vars.CodesPath, JsonConvert.SerializeObject(Vars.Codes));
+                        Console.WriteLine(">> Codes.json was updated.");
                         break;
 
                     case "save":
                     case "s":
                         if(answer[1].ToLower() == "humanity") {
-                            BinSer.Serialize(Vars.Humanity, File.Open(Vars.HumanityPath, FileMode.Open));
-                            Console.WriteLine(">> Humanity.bin was updated.");
+                            File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity));
+                            Console.WriteLine(">> Humanity.json was updated.");
                         }
                         else if(answer[1].ToLower() == "shop") {
-                            BinSer.Serialize(Vars.Shop, File.Open(Vars.ShopPath, FileMode.Open));
-                            Console.WriteLine(">> Shop.bin was updated.");
+                            File.WriteAllText(Vars.ShopPath, JsonConvert.SerializeObject(Vars.Shop));
+                            Console.WriteLine(">> Shop.json was updated.");
+                        }
+                        else if(answer[1].ToLower() == "codes") {
+                            File.WriteAllText(Vars.CodesPath, JsonConvert.SerializeObject(Vars.Codes));
+                            Console.WriteLine(">> Codes.json was updated.");
                         }
                         else {
                             Console.WriteLine($"Неизвестная база данных \"{answer[1]}\"");
@@ -195,9 +202,6 @@ namespace Friendplant {
 
         private Task OnClientReady(ReadyEventArgs e) {
 
-
-
-
             // Set Activity
             Client.UpdateStatusAsync(
                 game: new DiscordGame {
@@ -214,45 +218,87 @@ namespace Friendplant {
             // Do Autosave
             DoAutosave = true;
 
-            // Bank restoring
+            // Humanity restoring
             try {
-                Vars.Humanity = BinSer.Deserialize<Dictionary<ulong, Profile>>(
-                    File.Exists(Vars.HumanityPath) ?
-                    File.Open(Vars.HumanityPath, FileMode.Open) :
-                    File.Open(Vars.HumanityPath, FileMode.Create));
-
-                Console.ForegroundColor = ConsoleColor.Magenta; Console.WriteLine($">>> Humanity succesfully restored with {Vars.Humanity.Count} profiles."); Console.ResetColor();
-
-                Console.BackgroundColor = ConsoleColor.Magenta; Console.ForegroundColor = ConsoleColor.Black;
-                foreach(ulong key in Vars.Humanity.Keys) {
-
-                    DiscordUser bUser = Client.GetUserAsync(key).Result;
-                    Console.WriteLine($"> {bUser.Username}#{bUser.Discriminator} - {key}");
+                if(!File.Exists(Vars.HumanityPath)) {
+                    File.Create(Vars.HumanityPath).Close();
+                    File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity));
                 }
-                Console.BackgroundColor = ConsoleColor.Black; Console.ForegroundColor = ConsoleColor.White;
+
+                Vars.Humanity = JsonConvert.DeserializeObject<Dictionary<ulong, Profile>>(File.ReadAllText(Vars.HumanityPath));
+
+                if(Vars.Humanity != null) {
+                    Console.ForegroundColor = ConsoleColor.Magenta; Console.WriteLine($">>> Humanity succesfully restored with {Vars.Humanity.Count} profiles."); Console.ResetColor();
+
+                    Console.BackgroundColor = ConsoleColor.Magenta; Console.ForegroundColor = ConsoleColor.Black;
+                    foreach(ulong key in Vars.Humanity.Keys) {
+
+                        DiscordUser bUser = Client.GetUserAsync(key).Result;
+                        Console.WriteLine($"> {bUser.Username}#{bUser.Discriminator} - {key}");
+                    }
+                    Console.BackgroundColor = ConsoleColor.Black; Console.ForegroundColor = ConsoleColor.White;
+                }
+                else {
+                    Console.ForegroundColor = ConsoleColor.Magenta; Console.WriteLine(">>> Humanity is null."); Console.ResetColor();
+                }
             }
-            catch(System.Runtime.Serialization.SerializationException) {
+            catch(Exception exc) {
+                Console.WriteLine(exc);
                 Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine($">>> Humanity.bin file is badly formed."); Console.ResetColor();
             }
 
-            // Bank restoring
+            // Shop restoring
             try {
-                Vars.Shop = BinSer.Deserialize<Dictionary<ulong, RoleItem>>(
-                    File.Exists(Vars.ShopPath) ?
-                    File.Open(Vars.ShopPath, FileMode.Open) :
-                    File.Open(Vars.ShopPath, FileMode.Create));
-
-                Console.ForegroundColor = ConsoleColor.Magenta; Console.WriteLine($">>> Shop succesfully restored with {Vars.Humanity.Count} items."); Console.ResetColor();
-
-                Console.BackgroundColor = ConsoleColor.Magenta; Console.ForegroundColor = ConsoleColor.Black;
-                foreach(RoleItem item in Vars.Shop.Values) {
-
-                    Console.WriteLine($"> \"{item.Name}\":\"{item.Desc}\" - {item.Cost} - {item.Id}");
+                if(!File.Exists(Vars.ShopPath)) {
+                    File.Create(Vars.ShopPath).Close();
+                    File.WriteAllText(Vars.ShopPath, JsonConvert.SerializeObject(Vars.Shop));
                 }
-                Console.BackgroundColor = ConsoleColor.Black; Console.ForegroundColor = ConsoleColor.White;
+
+                Vars.Shop = JsonConvert.DeserializeObject<Dictionary<ulong, RoleItem>>(File.ReadAllText(Vars.ShopPath));
+
+                if(Vars.Shop != null) {
+                    Console.ForegroundColor = ConsoleColor.Magenta; Console.WriteLine($">>> Shop succesfully restored with {Vars.Humanity.Count} items."); Console.ResetColor();
+
+                    Console.BackgroundColor = ConsoleColor.Magenta; Console.ForegroundColor = ConsoleColor.Black;
+                    foreach(RoleItem item in Vars.Shop.Values) {
+                        Console.WriteLine($"> {item.Name} - \"{item.Desc}\"");
+                    }
+                    Console.BackgroundColor = ConsoleColor.Black; Console.ForegroundColor = ConsoleColor.White;
+                }
+                else {
+                    Console.ForegroundColor = ConsoleColor.Magenta; Console.WriteLine(">>> Shop is null."); Console.ResetColor();
+                }
             }
-            catch(System.Runtime.Serialization.SerializationException) {
-                Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine($">>> Shop.bin file is badly formed."); Console.ResetColor();
+            catch(Exception exc) {
+                Console.WriteLine(exc);
+                Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine($">>> Shop file is badly formed."); Console.ResetColor();
+            }
+
+            // Codes Restoring
+            try {
+                if(!File.Exists(Vars.CodesPath)) {
+                    File.Create(Vars.CodesPath).Close();
+                    File.WriteAllText(Vars.CodesPath, JsonConvert.SerializeObject(Vars.Codes));
+                }
+
+                Vars.Codes = JsonConvert.DeserializeObject<Dictionary<string, PrizeCode>>(File.ReadAllText(Vars.CodesPath));
+
+                if(Vars.Codes != null) {
+                    Console.ForegroundColor = ConsoleColor.Magenta; Console.WriteLine($">>> Codes succesfully restored with {Vars.Humanity.Count} amount."); Console.ResetColor();
+
+                    Console.BackgroundColor = ConsoleColor.Magenta; Console.ForegroundColor = ConsoleColor.Black;
+                    foreach(PrizeCode code in Vars.Codes.Values) {
+                        Console.WriteLine($"> {code.Code} - {code.Cost}");
+                    }
+                    Console.BackgroundColor = ConsoleColor.Black; Console.ForegroundColor = ConsoleColor.White;
+                }
+                else {
+                    Console.ForegroundColor = ConsoleColor.Magenta; Console.WriteLine(">>> Codes is Null."); Console.ResetColor();
+                }
+            }
+            catch(Exception exc) {
+                Console.WriteLine(exc);
+                Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine($">>> Codes file is badly formed."); Console.ResetColor();
             }
 
             return Task.CompletedTask;
@@ -272,7 +318,7 @@ namespace Friendplant {
 
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine(">>> Humanity.bin autosaving...");
-            BinSer.Serialize(Vars.Humanity, File.Open(Vars.HumanityPath, FileMode.Open));
+            File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity));
             Console.WriteLine(">>> Humanity.bin succesfully saved.");
 
             Console.ResetColor();
@@ -282,6 +328,7 @@ namespace Friendplant {
 
         private Task OnMessageCreated(MessageCreateEventArgs e) {
             if(e.Author.IsBot) return Task.CompletedTask; // Bot ignore
+            if(e.Channel.Id == 758374102649667615) return Task.CompletedTask; // Ignore spam channel
 
             new Profile(e.Author);
 
