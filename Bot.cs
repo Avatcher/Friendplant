@@ -81,9 +81,9 @@ namespace Friendplant {
                     case "close":
                     case "c":
                         File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity, Newtonsoft.Json.Formatting.Indented));
-                        Console.WriteLine(">> Humanity.bin was updated.");
+                        Console.WriteLine(">> Humanity.json was updated.");
                         File.WriteAllText(Vars.ShopPath, JsonConvert.SerializeObject(Vars.Shop, Newtonsoft.Json.Formatting.Indented));
-                        Console.WriteLine(">> Shop.bin was updated.");
+                        Console.WriteLine(">> Shop.json was updated.");
 
                         Console.WriteLine(">> Closing program...");
 
