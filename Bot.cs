@@ -28,76 +28,70 @@ namespace Friendplant {
 
         public async Task RunAsync() {
 
-            // Creating Configuration
+            // Создание конфигурации
             var config = new DiscordConfiguration {
                 Token = Vars.Token,
                 TokenType = TokenType.Bot,
 
                 AutoReconnect = true,
-                LogLevel = LogLevel.Debug,
+                LogLevel = LogLevel.Info,
                 UseInternalLogHandler = true,
             };
 
-            // Creating Client
+            // Создаем Клиент бота
             Client = new DiscordClient(config);
 
             Client.UseInteractivity(new InteractivityConfiguration {
                 Timeout = TimeSpan.FromMinutes(2)
             });
 
-            // VoiceCreations channels ids
-            VoiceCreations.Add(798144643275161610);
-            VoiceCreations.Add(798144711869071360);
-            VoiceCreations.Add(798144774262620160);
-            VoiceCreations.Add(798144827932934174);
-            VoiceCreations.Add(798144929967636492);
-
-
-            // Bot events
+            // События бота
             Client.Ready += OnClientReady;
             Client.Heartbeated += OnHeartbeat;
             Client.GuildAvailable += OnGuildAvailible;
             Client.MessageCreated += OnMessageCreated;
             
 
-            // Creating Commands Configuration
+            // Создаем конфигурацию команд
             var commandsConfig = new CommandsNextConfiguration {
                 StringPrefix = Vars.Prefix,
                 IgnoreExtraArguments = false,
-                EnableMentionPrefix = true,   // Allow to use @Friendplant as prefix
-                EnableDefaultHelp = false     // Disable default help command
+                EnableMentionPrefix = true,   // Позволяет использовать пинг как префикс команд
+                EnableDefaultHelp = false     // Выключает стандартную команду help
             };
 
-            // Creating Commands Module
+            // Создаем модуль команд
             CommandsModule = Client.UseCommandsNext(commandsConfig);
 
-            // Registring Commands Modules
-            CommandsModule.RegisterCommands<Commands.CMGeneric>(); // Generic and Standart Commands
-            CommandsModule.RegisterCommands<Commands.CMMoney>();   // Money Commands
-            CommandsModule.RegisterCommands<Commands.CMAdmins>();  // Admin Commands
-            //////////////////////////////
+            // Регистрация Команд
+            CommandsModule.RegisterCommands<Commands.CMGeneric>(); // Стандартные команды
+            CommandsModule.RegisterCommands<Commands.CMMoney>();   // Команды связанные с деньгами
+            CommandsModule.RegisterCommands<Commands.CMAdmins>();  // Команды админов
+            /////////////////////
 
-            // Final Operations
-            await Client.ConnectAsync(); // Enable Bot
+            // Включаем бота, ало
+            await Client.ConnectAsync();
 
-            // Command console + infinity loop
+            // Консоль для команд + вечный цикл чтобы бот не выключился
             while(true) {
                 string[] answer = Console.ReadLine().Split(' ');
                 switch(answer[0]) {
 
+                    // Выключить бота, сохранив все БД
                     case "close":
                     case "c":
-                        File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity));
+                        File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity, Newtonsoft.Json.Formatting.Indented));
                         Console.WriteLine(">> Humanity.bin was updated.");
-                        File.WriteAllText(Vars.ShopPath, JsonConvert.SerializeObject(Vars.Shop));
+                        File.WriteAllText(Vars.ShopPath, JsonConvert.SerializeObject(Vars.Shop, Newtonsoft.Json.Formatting.Indented));
                         Console.WriteLine(">> Shop.bin was updated.");
 
                         Console.WriteLine(">> Closing program...");
 
                         Client.DisconnectAsync().GetAwaiter().GetResult();
-                        Environment.Exit(0); // Close program
+                        Environment.Exit(0); // Закрывает программу
                         break;
-
+                    
+                    // Загрузить БД из файла
                     case "load":
                         if(answer[1].ToLower() == "humanity") {
                             Vars.Humanity = JsonConvert.DeserializeObject<Dictionary<ulong, Profile>>(File.ReadAllText(Vars.HumanityPath));
@@ -112,6 +106,7 @@ namespace Friendplant {
                         }
                         break;
 
+                    // Сохранить ВСЕ БД в файлы
                     case "saveall":
                         File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity));
                         Console.WriteLine(">> Humanity.json was updated.");
@@ -121,6 +116,7 @@ namespace Friendplant {
                         Console.WriteLine(">> Codes.json was updated.");
                         break;
 
+                    // Сохранить БД в файл
                     case "save":
                     case "s":
                         if(answer[1].ToLower() == "humanity") {
@@ -140,6 +136,7 @@ namespace Friendplant {
                         }
                         break;
 
+                    // Выводит список элементов в БД
                     case "list":
                         if(answer[1].ToLower() == "humanity") {
                             Console.WriteLine($">>> Humanity contains {Vars.Humanity.Count} profiles");
@@ -165,6 +162,7 @@ namespace Friendplant {
 
                         break;
 
+                    // Выдает дозу радиации (админку) пользователю
                     case "radiate":
                         ulong rid = (ulong)Convert.ToInt64(answer[1]);
                         DiscordUser usr = Client.GetUserAsync(rid).Result;
@@ -173,6 +171,7 @@ namespace Friendplant {
                         Console.WriteLine($">> {usr.Username}#{usr.Discriminator} get a dose of radiation.");
                         break;
 
+                    // Обнулить БД
                     case "clear":
                         if(answer[1].ToLower() == "humanity") {
                             Vars.Humanity.Clear();
@@ -188,6 +187,7 @@ namespace Friendplant {
 
                         break;
 
+                    // Включает/выключает автосохранение БД
                     case "autosave":
                         DoAutosave = !DoAutosave;
                         Console.WriteLine(">> Autosave is now " + DoAutosave.ToString());
@@ -202,7 +202,7 @@ namespace Friendplant {
 
         private Task OnClientReady(ReadyEventArgs e) {
 
-            // Set Activity
+            // Установка активности бота
             Client.UpdateStatusAsync(
                 game: new DiscordGame {
                     Name = "*help"
@@ -210,15 +210,15 @@ namespace Friendplant {
                 user_status: UserStatus.Online
                 );
 
-            // Voice Creations
-            foreach(DiscordChannel c in Client.GetChannelAsync(798144564933951538).Result.Children) {
-                VoiceCreations.Add(c.Id);
-            }
+            // Голосовые каналы - создателя  (Пока не используется)
+            // foreach(DiscordChannel c in Client.GetChannelAsync(798144564933951538).Result.Children) {
+            //    VoiceCreations.Add(c.Id);
+            // }
 
-            // Do Autosave
+            // Включение Автосохранения
             DoAutosave = true;
 
-            // Humanity restoring
+            // Восстановление Humanity
             try {
                 if(!File.Exists(Vars.HumanityPath)) {
                     File.Create(Vars.HumanityPath).Close();
@@ -247,7 +247,7 @@ namespace Friendplant {
                 Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine($">>> Humanity.bin file is badly formed."); Console.ResetColor();
             }
 
-            // Shop restoring
+            // Восстановление Shop
             try {
                 if(!File.Exists(Vars.ShopPath)) {
                     File.Create(Vars.ShopPath).Close();
@@ -274,7 +274,7 @@ namespace Friendplant {
                 Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine($">>> Shop file is badly formed."); Console.ResetColor();
             }
 
-            // Codes Restoring
+            // Восстановление Codes
             try {
                 if(!File.Exists(Vars.CodesPath)) {
                     File.Create(Vars.CodesPath).Close();
@@ -301,11 +301,13 @@ namespace Friendplant {
                 Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine($">>> Codes file is badly formed."); Console.ResetColor();
             }
 
+            // Конец
             return Task.CompletedTask;
         }
 
         private Task OnHeartbeat(HeartbeatEventArgs e) {
 
+            // Если Автосохранение выключено - завершить
             if(!DoAutosave) return Task.CompletedTask;
 
             if(AutosaveIn < AutosaveEveryHeartbeat) {
@@ -316,42 +318,45 @@ namespace Friendplant {
                 AutosaveIn = 0;
             }
 
+            // Само сохранение
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine(">>> Humanity.bin autosaving...");
             File.WriteAllText(Vars.HumanityPath, JsonConvert.SerializeObject(Vars.Humanity));
             Console.WriteLine(">>> Humanity.bin succesfully saved.");
-
             Console.ResetColor();
 
+            // Конец
             return Task.CompletedTask;
         }
 
         private Task OnMessageCreated(MessageCreateEventArgs e) {
-            if(e.Author.IsBot) return Task.CompletedTask; // Bot ignore
-            if(e.Channel.Id == 758374102649667615) return Task.CompletedTask; // Ignore spam channel
+            if(e.Author.IsBot) return Task.CompletedTask; // Игнорировать сообщеения от ботов
+            if(e.Channel.Id == 758374102649667615) return Task.CompletedTask; // Игнорирование канала для спама
 
             new Profile(e.Author);
 
-            if(Vars.Humanity[e.Author.Id].Level.AddExp()) { // Return true, if levelUp
+            if(Vars.Humanity[e.Author.Id].Level.AddExp()) { // Активируется, если у чела новый уровень
 
-                int blesk = Convert.ToInt32(5 * 0.5 * Vars.Humanity[e.Author.Id].Level.Amount); // Prize sparkles
-                Vars.Humanity[e.Author.Id].Balance.Transfer(blesk, new HistoryElement(Vars.Humanity[e.Author.Id].Balance, "+"+blesk, "Новый уровень"), false);
+                int blesk = Convert.ToInt32(5 * 0.5 * Vars.Humanity[e.Author.Id].Level.Amount); // Вычисление денег для награды
+                Vars.Humanity[e.Author.Id].Balance.Transfer(blesk, false, $"+{blesk}", "Новый уровень"); // Начисление
 
-                if(!Vars.Humanity[e.Author.Id].Level.Muted) e.Channel.SendMessageAsync(
+                if(!Vars.Humanity[e.Author.Id].Level.Muted) e.Channel.SendMessageAsync( // Активируется если уведомления включены
                     $"> :tada: Поздравляю, {e.Author.Mention}, ты достиг `{Vars.Humanity[e.Author.Id].Level.Amount}` уровня!\n> Ты получаешь `{blesk}`{Vars.Emoji["sparkle"]} блестяшек!");
             }
 
+            // Конец
             return Task.CompletedTask;
         }
 
         private Task OnGuildAvailible(GuildCreateEventArgs e) {
 
-            if(e.Guild.Id == 797103909424332811) { // Adding emoji from Friendplant Case server
+            if(e.Guild.Id == 797103909424332811) { // Добавление эмодзи с Friendplant case
                 foreach(DiscordEmoji emoji in e.Guild.Emojis) {
                     Vars.Emoji[emoji.Name] = $"<:{emoji.Name}:{emoji.Id}>";
                 }
             }
 
+            // Конец
             return Task.CompletedTask;
         }
 

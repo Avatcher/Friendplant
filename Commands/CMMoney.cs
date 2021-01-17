@@ -65,8 +65,8 @@ namespace Friendplant.Commands {
             await msg.CreateReactionAsync(emo2);
 
             if(inter.WaitForMessageReactionAsync(msg, ctx.User).Result.Emoji == emo) {
-                Vars.Humanity[ctx.User.Id].Balance.Transfer(count * -1, new HistoryElement(Vars.Humanity[ctx.User.Id].Balance, "-" + count, "Перевод на " + user.Mention), true);
-                Vars.Humanity[user.Id].Balance.Transfer(count, new HistoryElement(Vars.Humanity[user.Id].Balance, "+" + count, "Перевод от " + ctx.User.Mention), false);
+                Vars.Humanity[ctx.User.Id].Balance.Transfer(count * -1, true, $"-{count}", "Перевод на " + user.Mention);
+                Vars.Humanity[user.Id].Balance.Transfer(count, false, $"+{count}", "Перевод от " + ctx.User.Mention);
 
                 await msg.DeleteAllReactionsAsync();
                 await msg.ModifyAsync(embed: new DiscordEmbedBuilder {
@@ -133,9 +133,9 @@ namespace Friendplant.Commands {
                         break;
                 }
                 win = true;
-                Vars.Humanity[ctx.User.Id].Balance.Transfer(30, new HistoryElement(Vars.Humanity[ctx.User.Id].Balance, "+30", "Джекпот в казино"), false);
+                Vars.Humanity[ctx.User.Id].Balance.Transfer(30, false, "+30", "Джекпот в казино");
             }
-            else Vars.Humanity[ctx.User.Id].Balance.Transfer(-2, new HistoryElement(Vars.Humanity[ctx.User.Id].Balance, "-2", "Проигрыш в казино"), true);
+            else Vars.Humanity[ctx.User.Id].Balance.Transfer(-2, true, "-2", "Проигрыш в казино");
 
             var embed = new DiscordEmbedBuilder {
                 Title = result,
@@ -268,12 +268,7 @@ namespace Friendplant.Commands {
             // Buying confirm
             if(ctx.Client.GetInteractivityModule().WaitForMessageReactionAsync(msg, ctx.User).Result.Emoji == emo) {
                 Vars.Humanity[ctx.User.Id].Balance.Transfer(
-                    Vars.Shop[dict[num]].Cost * -1, 
-                    new HistoryElement(
-                        Vars.Humanity[ctx.User.Id].Balance,
-                        Convert.ToString(Vars.Shop[dict[num]].Cost*-1),
-                        $"Покупка `{Vars.Shop[dict[num]].Name}`"
-                        ), true);
+                    Vars.Shop[dict[num]].Cost * -1, true, $"{Vars.Shop[dict[num]].Cost * -1}", $"Покупка `{Vars.Shop[dict[num]].Name}`");
                 Vars.Humanity[ctx.User.Id].Items.Add(dict[num]);
 
                 await ctx.Member.GrantRoleAsync(ctx.Guild.GetRole(dict[num]));
@@ -323,10 +318,12 @@ namespace Friendplant.Commands {
             });
             await dm.DeleteAsync();
 
-            await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
-                Title = ":label: Подарочный код был отправлен в личные сообщения.",
-                Color = Vars.ColorBlue
-            });
+            if(ctx.Channel.Type != DSharpPlus.ChannelType.Private) {
+                await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder {
+                    Title = ":label: Подарочный код был отправлен в личные сообщения.",
+                    Color = Vars.ColorBlue
+                });
+            }
 
             File.WriteAllText(Vars.CodesPath, JsonConvert.SerializeObject(Vars.Codes));
         }

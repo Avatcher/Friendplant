@@ -1,1 +1,65 @@
-{}
+{
+  "354297822691983371": {
+    "Items": [],
+    "Id": 354297822691983371,
+    "Balance": {
+      "History": [
+        {
+          "Date": "17.01.21 - 13:38:13",
+          "Amount": "-1",
+          "Description": "Создан подарочный код"
+        },
+        {
+          "Date": "17.01.21 - 12:55:21",
+          "Amount": "-80",
+          "Description": "Создан подарочный код"
+        },
+        {
+          "Date": "17.01.21 - 12:54:45",
+          "Amount": "+20",
+          "Description": "Стартовый капитал"
+        }
+      ],
+      "Money": -61,
+      "Spent": 81
+    },
+    "Level": {
+      "Amount": 1,
+      "Experience": 7,
+      "ExpNeeding": 15,
+      "TotalExperience": 7,
+      "Muted": false
+    },
+    "Color": 7506394,
+    "Radioactive": true
+  },
+  "555767665986109450": {
+    "Items": [],
+    "Id": 555767665986109450,
+    "Balance": {
+      "History": [
+        {
+          "Date": "17.01.21 - 13:27:51",
+          "Amount": "+80",
+          "Description": "Использован подарочный код"
+        },
+        {
+          "Date": "17.01.21 - 13:27:50",
+          "Amount": "+20",
+          "Description": "Стартовый капитал"
+        }
+      ],
+      "Money": 100,
+      "Spent": 0
+    },
+    "Level": {
+      "Amount": 1,
+      "Experience": 0,
+      "ExpNeeding": 15,
+      "TotalExperience": 0,
+      "Muted": false
+    },
+    "Color": 7506394,
+    "Radioactive": false
+  }
+}

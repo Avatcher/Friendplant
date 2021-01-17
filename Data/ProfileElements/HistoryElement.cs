@@ -6,28 +6,21 @@ namespace Friendplant.Data.ProfileElements {
 
     [Serializable]
     public class HistoryElement {
-        public string Date { get; private set; }
-        public string Amount { get; private set; }
-        public string Description { get; private set; }
+        public string Date { get; private set; } // Дата транзакции
+        public string Amount { get; private set; } // Изменение баланса
+        public string Description { get; private set; } // Описание транзакции
 
         public HistoryElement(Balance balance, string amount, string description, string date = null) {
 
-            // Set Date
+            // Автоматическое установление даты
             if(date == null) {
                 Date = DateTimeOffset.Now.ToString("dd.MM.yy - H:mm:ss");
             }
             else Date = date;
 
-            Amount = amount;            // Set Amount of sparkles
-            Description = description;  // Set Description
+            Amount = amount;            // Устанавливаем на сколько изменился баланс
+            Description = description;  // Устанавливаем описание
 
-            // Extra history remove
-            if(balance.History.Count == 10) {
-                balance.History.RemoveAt(9);
-            }
-
-            // Release History Element
-            balance.History.Insert(0, this);
         }
     }
 }
